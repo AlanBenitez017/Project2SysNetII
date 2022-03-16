@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -std=c++11 -Wall
+CXXFLAGS = -g -std=c++11 -Wall -pthread -Wall -Werror=return-type -Werror=uninitialized
 
 SRCS = $(wildcard *.hpp)
 OBJECTS = $(SRCS: .hpp=.o)
