@@ -41,10 +41,7 @@ Server::Server() {
             //threads[usersActive] = std::thread(handleNewClient, newUserr);
             cout << "Handler assigned" << endl;
 
-            memset(sendingBuff, 0, MAX);
-            string firstOptions = "Welcome!\n  Press 1 to Login\n  Press 2 to Register\n  Type \'exit\' to Quit\n";
-            strcpy(sendingBuff, firstOptions.c_str());
-            write(new_socket, sendingBuff, (int)MAX);
+            mainMenu();
             while(leave == false && logedIn == false){
                 memset(receivingBuff, 0, MAX);
                 read(new_socket, receivingBuff, (size_t)MAX);
@@ -53,129 +50,54 @@ Server::Server() {
                     exit(EXIT_SUCCESS);
                 }
                 if(strcmp(receivingBuff, "1") == 0){
-                    Login();
+                    if(Login()){
+                        logedIn = true;
+                        optionsWhenLoggedIn();
+                    }
                 }
                 if(strcmp(receivingBuff, "2") == 0){
                     Register();
+                    mainMenu();
                 }
             }
 
 
-            /*char * request = new char [400];
-            char * pointer = request;
-            int numBytes = 0;
-            int max = 400;
-            int length = 0;
-            string received;
 
-            while((numBytes = read(new_socket,pointer,max)) > 0) {
-                pointer += numBytes;
-                max -= numBytes;
-                length += numBytes;
-            }
-
-            if(numBytes < 0){
-                cout << "Error reading"<< endl;
-            }
-
-            received = request;
-
-            cout << "Request from client\n\n" + received +" \n\nend of what was received\n" << endl;*/
-
-            //handleResponses();
-            //memset(receivingBuff, '\0', sizeof sendingBuff);
-//            read(server_fd, receivingBuff, 30000);//message sent form client is in the buffer
-//            cout << receivingBuff << "hola" << endl;
-//            string r;
-//            r += receivingBuff;
-//            cout << r << endl;
-            /*if(received.find("register")!=string::npos){
-                string delimiter = " ";
-                vector<string> words;
-                size_t pos = 0;
-                while ((pos = received.find(delimiter)) != string::npos) {
-                    words.push_back(received.substr(0, pos));
-                    received.erase(0, pos + delimiter.length());
-                }
-                string username = words.at(2);
-                string password = words.at(4);
-                users[username] = password;//.insert(username, password);
-                ofstream usersFile;
-                usersFile.open("users.txt", fstream::app);
-                if (usersFile.is_open())
-                {
-                    usersFile << username << "\t" << password << endl;
-                    usersFile.close();
-                }
-                else cout << "Unable to open file";
-
-                memset(sendingBuff, '\0', sizeof sendingBuff);
-                string sendToServer = "Successfully Registered";
-                strcpy(sendingBuff, sendToServer.c_str());
-                cout << sendingBuff << "probando" << endl;
-                write(server_fd, sendingBuff, sizeof sendingBuff);
-
-            }
-
-            if(received.find("login")!=string::npos){
-                string delimiter = " ";
-                vector<string> words;
-                size_t pos = 0;
-                while ((pos = received.find(delimiter)) != string::npos) {
-                    words.push_back(received.substr(0, pos));
-                    received.erase(0, pos + delimiter.length());
-                }
-                string username = words.at(2);
-                string password = words.at(4);
-                bool found = false;
-                map<string, string>::iterator it;
-                for (it = users.begin(); it != users.end(); it++)
-                {
-                    string uName = it->first;
-                    string pWord = it->second;
-                    if(uName == username && pWord == password){
-                        found = true;
-                        //cout << "Successfully logged in" << endl;
-                        //User user = new User (username, password);
-                        //optionsWhenLoggedIn(password);
-                    }else{
-                        found = false;
-                        //cout << "Could not find the account, please register if you did not have done so or try again" << endl;
-                    }
-                    //std::cout << it->first    // string (key)
-                    //          << ':'
-                    //          << it->second   // string's value
-                    //          << std::endl;
-                }
-                if(found){
-                    cout << "Successfully logged in" << endl;
-                }else{
-                    cout << "Could not find the account, please register if you did not have done so or try again" << endl;
-                }
-
-                memset(sendingBuff, '\0', sizeof sendingBuff);
-                string sendToServer = "Successfully logged in";
-                strcpy(sendingBuff, sendToServer.c_str());
-                write(server_fd, sendingBuff, sizeof sendingBuff);
-
-
-            }*/
-            //User user = new User()
-            //Login();
 
         }
     }
 }
 
-void Server::Login() {
+bool Server::Login() {
+    memset(receivingBuff, 0, MAX);
+    memset(sendingBuff, 0, MAX);
 
     string username, password;
-    memset(sendingBuff, 0, MAX);
     string uName = " Username:\n";
+
     strcpy(sendingBuff, uName.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+
+    username = receivingBuff;
+    memset(sendingBuff, 0, MAX);
+    string pWord = " Password:\n";
+    strcpy(sendingBuff, pWord.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-    cin.getline(receivingBuff, MAX);
-    read(new_socket, receivingBuff, (size_t)MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+    password = receivingBuff;
+    cout << "u: " << username << " p: "  << password << endl;
+
+    if(checkLogin(username, password)){
+        memset(sendingBuff, 0, MAX);
+        string loggedIn = "Successfully Logged In";
+        strcpy(sendingBuff, loggedIn.c_str());
+        write(new_socket, sendingBuff, (int)MAX);
+        return true;
+    }else{
+        return false;
+    }
     /*cout << " Username:" << endl;
     cin >> username;
     cout << endl << endl;
@@ -215,16 +137,34 @@ void Server::Register(){
 
     strcpy(sendingBuff, uName.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    //cin.getline(receivingBuff, MAX);    //le da la opcion de escribir al client
-    memset(receivingBuff, 0, MAX);
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
     read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
 
-    memset(receivingBuff, 0, MAX);
+    username = receivingBuff;
     memset(sendingBuff, 0, MAX);
     string pWord = " Password:\n";
     strcpy(sendingBuff, pWord.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-    //cin.getline(receivingBuff, MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+    password = receivingBuff;
+    cout << "u: " << username << " p: "  << password << endl;
+
+    ofstream usersFile;
+    usersFile.open("users.txt", fstream::app);
+    if (usersFile.is_open())
+    {
+        usersFile << username << "\t" << password << endl;
+        usersFile.close();
+    }
+    else{
+        cout << "Unable to open file";
+    }
+
+    memset(sendingBuff, 0, MAX);
+    string success = "Successfully Registered";
+    strcpy(sendingBuff, success.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+    //cout << "Successfully Registered "<< endl;
     /*string username, password;
 
     cout << " Username:" << endl;
@@ -274,4 +214,100 @@ void Server::handleNewClient(struct newUser* user) {
     usersActive--;
     lock.unlock();
     std::terminate();
+}
+
+void Server::mainMenu() {
+    memset(sendingBuff, 0, MAX);
+    string firstOptions = "Welcome!\n  Press 1 to Login\n  Press 2 to Register\n  Type \'exit\' to Quit\n";
+    strcpy(sendingBuff, firstOptions.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+}
+
+bool Server::checkLogin(string username, string password) {
+    string uName, pWord;
+    ifstream usersFile;
+    usersFile.open("users.txt");
+    if (usersFile.is_open())
+    {
+        usersFile >> uName >> pWord;
+        while (!usersFile.eof()) { // keep reading until end-of-file
+            if(uName == username && pWord == password){
+                return true;
+            }
+//            }else{
+//                cout << "Could not find the account, please register if you did not have done so or try again" << endl;
+//            }
+            usersFile >> uName >> pWord; // sets EOF flag if no value found
+        }
+        usersFile.close();
+    }
+    return false;
+}
+
+void Server::optionsWhenLoggedIn() {
+    memset(sendingBuff, 0, MAX);
+    string options;
+    options = " 1. Subscribe to a location\n";
+    options += " 2. Unsubscribe to a location\n";
+    options += " 3. See the online users\n";
+    options += " 4. Send a message to a user\n";
+    options += " 5. Send a group message to a location\n";
+    options += " 6. See all the locations that the client has subscribed to\n";
+    options += " 7. See the last 10 message received\n";
+    options += " 8. Change password\n";
+    options += " 9. Quit\n";
+    strcpy(sendingBuff, options.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+
+    /*cout << " 1. Subscribe to a location" << endl;
+    cout << " 2. Unsubscribe to a location" << endl;
+    cout << " 3. See the online users" << endl;
+    cout << " 4. Send a message to a user" << endl;
+    cout << " 5. Send a group message to a location" << endl;
+    cout << " 6. See all the locations that the client has subscribed to" << endl;
+    cout << " 7. See the last 10 message received" << endl;
+    cout << " 8. Change password" << endl;
+    cout << " 9. Quit" << endl;*/
+
+    string choice;
+    cin >> choice;
+    int choiceParsed = stoi(choice);
+    //while(choiceParsed > 0 || choiceParsed < 10){
+    switch(choiceParsed){
+        case 1:
+            cout << "option 1 chosen" << endl;
+            break;
+        case 2:
+            cout << "option 2 chosen" << endl;
+            break;
+        case 3:
+            cout << "option 3 chosen" << endl;
+            break;
+        case 4:
+            cout << "option 4 chosen" << endl;
+            break;
+        case 5:
+            cout << "option 5 chosen" << endl;
+            break;
+        case 6:
+            cout << "option 6 chosen" << endl;
+            break;
+        case 7:
+            cout << "option 7 chosen" << endl;
+            break;
+        case 8:
+            //cout << "option 8 chosen" << endl;
+            //changePassword(password);
+            break;
+        case 9:
+            exit(EXIT_SUCCESS);
+            //break;
+        default:
+            //while(choiceParsed < 0 && choiceParsed > 9){
+            cout << "invalid choice, please enter a valid choice" << endl;
+            cin >> choiceParsed;
+            //}
+
+            //continue;
+    }
 }

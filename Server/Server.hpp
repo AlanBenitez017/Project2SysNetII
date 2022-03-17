@@ -41,10 +41,14 @@ class Server{
         std::map<string, string> users;
         bool logedIn = false;
         bool leave = false;
-        void Login();
+        bool Login();
         void Register();
+        void mainMenu();
+        bool checkLogin(string username, string password);
+        void optionsWhenLoggedIn();
 
 
-};
+
+    };
 
 #endif //PROJECT2SYSNET_SERVER_HPP
