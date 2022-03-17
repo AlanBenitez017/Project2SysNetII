@@ -9,9 +9,9 @@ all: clean server client
 server: $(OBJECTS) Server/main.cpp Server/User.hpp Server/User.cpp Server/Server.cpp Server/Server.hpp ##location.hpp location.cpp common.hpp
 		$(CXX) $(CXXFLAGS) -o $@ $^ 
 
-client: $(OBJECTS) Client/main.cpp Client/Client.hpp Client/Client.cpp
+client: $(OBJECTS) Client/main.cpp Client/Client.hpp
 		$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:
 	rm -rf *.dSYM
-		$(RM) *.o *.gc* test/*.o core server
+		$(RM) *.o *.gc* test/*.o core server client

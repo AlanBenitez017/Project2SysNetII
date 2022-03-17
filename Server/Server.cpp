@@ -209,19 +209,22 @@ void Server::Login() {
 void Server::Register(){
     memset(receivingBuff, 0, MAX);
     memset(sendingBuff, 0, MAX);
+
     string username, password;
     string uName = " Username:\n";
+
     strcpy(sendingBuff, uName.c_str());
-    write(new_socket, sendingBuff, (int)MAX);
-    cin.getline(receivingBuff, MAX);
-    read(new_socket, receivingBuff, (size_t)MAX);
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    //cin.getline(receivingBuff, MAX);    //le da la opcion de escribir al client
+    memset(receivingBuff, 0, MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
 
     memset(receivingBuff, 0, MAX);
     memset(sendingBuff, 0, MAX);
     string pWord = " Password:\n";
-    strcpy(sendingBuff, uName.c_str());
+    strcpy(sendingBuff, pWord.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-    cin.getline(receivingBuff, MAX);
+    //cin.getline(receivingBuff, MAX);
     /*string username, password;
 
     cout << " Username:" << endl;

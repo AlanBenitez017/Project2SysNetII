@@ -22,13 +22,13 @@ using namespace std;
 
 class Client{
 public:
-    Client();
+    //Client();
     int client_fd;
-    char receivingBuff[MAX];
-    char sendingBuff[MAX];
-    int new_socket;
-    struct sockaddr_in address;
-    int addrLen;
+    char receivingBuff[MAX]{};
+    char sendingBuff[MAX]{};
+    int new_socket{};
+    struct sockaddr_in address{};
+    int addrLen{};
     void optionsWhenLoggedIn(string password);
     void changePassword(string password);
     bool exitClient = false;

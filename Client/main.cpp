@@ -1,31 +1,32 @@
-#include "Client.hpp"
+#include "../Client/Client.hpp"
 
 void sendMsg(int client_fd);
 void receiveMsg(int client_fd);
 
 int main(){
 
+    Client c;
     std::string ipAddress;
     cout << "Enter hostname: ";
     cin >> ipAddress;
     if(ipAddress == "localhost")
         ipAddress = "127.0.0.1";
 
-    if((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+    if((c.client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
         perror("Could not make socket !!!");
         exit(EXIT_FAILURE);
     } else{
         cout << "Socket created" << endl;
     }
 
-    memset(address.sin_zero, '\0', sizeof address.sin_zero);
-    address.sin_family = AF_INET;
-    address.sin_port = htons(PORT);
-    address.sin_addr.s_addr = inet_addr((char*)ipAddress.c_str());
+    memset(c.address.sin_zero, '\0', sizeof c.address.sin_zero);
+    c.address.sin_family = AF_INET;
+    c.address.sin_port = htons(PORT);
+    c.address.sin_addr.s_addr = inet_addr((char*)ipAddress.c_str());
 
-    if(connect(client_fd, (struct sockaddr*)&address, sizeof(address)) < 0){
+    if(connect(c.client_fd, (struct sockaddr*)&c.address, sizeof(c.address)) < 0){
         perror("Failed to bind !!!");
-        close(client_fd);
+        close(c.client_fd);
         exit(EXIT_FAILURE);
     } else{
         cout << "localhost resolved to 127.0.0.1" << endl << "Connected" << endl << endl;
@@ -34,40 +35,41 @@ int main(){
     //if(fork() == 0){
     //cout << "In forked process" << endl;
     //cout << "A client has connected" << endl;
-    memset(sendingBuff, '\0', sizeof sendingBuff);
-    memset(receivingBuff, '\0', sizeof receivingBuff);
+    memset(c.sendingBuff, '\0', sizeof c.sendingBuff);
+    memset(c.receivingBuff, '\0', sizeof c.receivingBuff);
 
-    read(client_fd,receivingBuff, (size_t) MAX);
-    cout << receivingBuff << endl;
-    //memset(sendingBuff,0,MAX_LEN);
-    cin.getline(sendingBuff, MAX);
-    write(client_fd, sendingBuff, (size_t)MAX);
+    read(c.client_fd,c.receivingBuff, (size_t) MAX);
+    cout << c.receivingBuff << endl;
+    memset(c.sendingBuff,0,MAX);
+    cin.getline(c.sendingBuff, MAX);
+    write(c.client_fd, c.sendingBuff, (size_t)MAX);
 
-    thread t1(receiveMsg, client_fd);
-    thread t2(sendMsg, client_fd);
+    thread t1(receiveMsg, c.client_fd);
+    thread t2(sendMsg, c.client_fd);
 
-    threadReceiving = move(t1);
-    threadSending = move(t2);
+    c.threadReceiving = move(t1);
+    c.threadSending = move(t2);
 
 
-    if (threadReceiving.joinable())
-        threadReceiving.join();
+    if (c.threadReceiving.joinable())
+        c.threadReceiving.join();
 
-    if (threadSending.joinable())
-        threadSending.join();
+    if (c.threadSending.joinable())
+        c.threadSending.join();
 
 
     return 0;
 }
 
 void receiveMsg(int client_fd) {
+    Client c;
     while(1){
-        memset(receivingBuff, 0, MAX);
-        cin.getline(receivingBuff, MAX);
-        write(client_fd, receivingBuff, (size_t)MAX);
-        if(strcmp(receivingBuff, "exit") == 0){
-            exitClient = true;
-            threadReceiving.detach();
+        memset(c.receivingBuff, 0, MAX);
+        cin.getline(c.receivingBuff, MAX);
+        write(client_fd, c.receivingBuff, (size_t)MAX);
+        if(strcmp(c.receivingBuff, "exit") == 0){
+            c.exitClient = true;
+            c.threadReceiving.detach();
             close(client_fd);
             return;
         }
@@ -75,18 +77,19 @@ void receiveMsg(int client_fd) {
 }
 
 void sendMsg(int client_fd) {
+    Client c;
     while(1){
-        if(exitClient){
-            threadSending.detach();
+        if(c.exitClient){
+            c.threadSending.detach();
             return;
         }
         //eraseText(MAX);
-        memset(sendingBuff, 0, MAX);
-        int bytesRecv = read(client_fd, sendingBuff, (size_t)MAX);
+        memset(c.sendingBuff, 0, MAX);
+        int bytesRecv = read(client_fd, c.sendingBuff, (size_t)MAX);
         if(bytesRecv <= 0){
             continue;
         }
-        cout << sendingBuff << endl;
+        cout << c.sendingBuff << endl;
         fflush(stdout);
     }
 }
