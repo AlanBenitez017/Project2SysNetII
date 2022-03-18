@@ -21,11 +21,9 @@ Server::Server() {
         exit(EXIT_FAILURE);
     }
 
-    std::thread threads[numThreads];
 
     while(true) {
 
-        //if(fork() == 0) {
         printf("Waiting for incoming connection...\n");
         if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrLen)) < 0) {
             perror("In accept");
@@ -160,34 +158,6 @@ void Server::Register(){
     strcpy(sendingBuff, success.c_str());
     write(new_socket, sendingBuff, (int)MAX);
 
-}
-
-
-
-void Server::handleNewClient(struct newUser* user) {
-    lock.lock();
-    usersActive++;
-    lock.unlock();
-
-    struct newUser* newUser = user;
-    int id_ = newUser->id;
-    int sock = newUser->new_socket;
-    char buffer[1280] = {0};
-
-    while(true){
-        if(read(sock, buffer, 30000) > 0){
-            //std::string packet = packet_util(buffer).http_response();
-            printf("THREAD: %d\n", id_);
-            //write(sock, (char*)packet.c_str(), (int)packet.size());
-            printf("---------- MESSAGE SENT -----------\n");
-        }
-    }
-    close(sock);
-
-    lock.lock();
-    usersActive--;
-    lock.unlock();
-    std::terminate();
 }
 
 void Server::changePassword() {
