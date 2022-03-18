@@ -1,3 +1,11 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: User.cpp
+  Project 2
+
+  Here I implement some methods that will be used in the server class
+***************************************************************/
+
 #include "User.hpp"
 
 User::User(string username, string password) {

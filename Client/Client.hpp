@@ -1,3 +1,10 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: Client.hpp
+  Project 2
+
+  This is the header file of the client
+***************************************************************/
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 #include <stdio.h>

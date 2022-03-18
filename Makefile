@@ -1,3 +1,4 @@
+#Alan Benitez
 CXX = g++
 CXXFLAGS = -g -std=c++11 -Wall -pthread -Wall -Werror=return-type -Werror=uninitialized
 
@@ -6,7 +7,7 @@ OBJECTS = $(SRCS: .hpp=.o)
 
 all: server client
 
-server: $(OBJECTS) Server/main.cpp Server/User.hpp Server/User.cpp Server/Server.cpp Server/Server.hpp ##location.hpp location.cpp common.hpp
+server: $(OBJECTS) Server/main.cpp Server/User.hpp Server/User.cpp Server/Server.cpp Server/Server.hpp
 		$(CXX) $(CXXFLAGS) -o $@ $^ 
 
 client: $(OBJECTS) Client/main.cpp Client/Client.hpp

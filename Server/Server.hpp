@@ -1,3 +1,10 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: Server.hpp
+  Project 2
+
+  This is the header file of the server
+***************************************************************/
 #ifndef SERVER_HPP
 #define SERVER_HPP
 #include <stdio.h>
@@ -31,7 +38,7 @@ class Server{
         int addrLen;
         Server();
         std::map<string, string> users;
-        bool logedIn = false;
+        bool loggedIn = false;
         bool Login();
         void Register();
         void mainMenu();

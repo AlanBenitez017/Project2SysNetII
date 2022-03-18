@@ -1,3 +1,11 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: main.cpp
+  Project 2
+
+  This is the main file of the client where I do the connections with the appropriate ports and send and receive messages from the client
+***************************************************************/
+
 #include "Client.hpp"
 
 void sendMsg(int client_fd);

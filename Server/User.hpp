@@ -1,3 +1,11 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: User.hpp
+  Project 2
+
+  This is the header file of the user class
+***************************************************************/
+
 #ifndef USER_HPP
 #define USER_HPP
 #include<iostream>

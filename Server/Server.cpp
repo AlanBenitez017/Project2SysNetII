@@ -1,3 +1,10 @@
+/***************************************************************
+  Student Name: Alan Benitez
+  File Name: Srver.cpp
+  Project 2
+
+  In this file I develop the responses from the client. Will add the new users to a .txt file and does the communication with the client
+***************************************************************/
 #include "Server.hpp"
 
 Server::Server() {
@@ -36,7 +43,7 @@ Server::Server() {
 
             mainMenu();
 
-            while(logedIn){
+            while(loggedIn){
                 memset(receivingBuff, 0, MAX);
                 read(new_socket, receivingBuff, (size_t)MAX);
                 string choice = receivingBuff;
@@ -67,7 +74,7 @@ Server::Server() {
                         changePassword();
                         break;
                     case 9:
-                        logedIn = false;
+                        loggedIn = false;
                         mainMenu();
                         break;
                     default:
@@ -215,7 +222,7 @@ void Server::mainMenu() {
     strcpy(sendingBuff, firstOptions.c_str());
     write(new_socket, sendingBuff, (int)MAX);
 
-    while(logedIn == false){
+    while(loggedIn == false){
         memset(receivingBuff, 0, MAX);
         read(new_socket, receivingBuff, (size_t)MAX);
         if(strcmp(receivingBuff, "exit") == 0){
@@ -225,7 +232,7 @@ void Server::mainMenu() {
         if(strcmp(receivingBuff, "1") == 0){
             if(Login()){
                 optionsWhenLoggedIn();
-                logedIn = true;
+                loggedIn = true;
             }else{
                 string notFound = "Could not find the account";
                 strcpy(sendingBuff, notFound.c_str());
