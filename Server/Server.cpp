@@ -25,13 +25,14 @@ Server::Server() {
 
     while(true) {
 
-        if(usersActive < numThreads) {
-            printf("Waiting for incoming connection...\n");
-            if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrLen)) < 0) {
-                perror("In accept");
-                exit(EXIT_FAILURE);
-            }
+        //if(fork() == 0) {
+        printf("Waiting for incoming connection...\n");
+        if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrLen)) < 0) {
+            perror("In accept");
+            exit(EXIT_FAILURE);
+        }
 
+        if(fork() == 0){
             cout << "Connection accepted" << endl;
             cout << "Handler assigned" << endl;
 
