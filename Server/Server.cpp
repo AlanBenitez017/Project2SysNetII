@@ -109,6 +109,8 @@ bool Server::Login() {
     cout << "u: " << username << " p: "  << password << endl;
 
     if(checkLogin(username, password)){
+        u.setUsername(username);
+        u.setPassword(password);
         memset(sendingBuff, 0, MAX);
         string loggedIn = "Successfully Logged In";
         strcpy(sendingBuff, loggedIn.c_str());
@@ -152,7 +154,6 @@ void Server::Register(){
     else{
         cout << "Unable to open file";
     }
-
     memset(sendingBuff, 0, MAX);
     string success = "Successfully Registered";
     strcpy(sendingBuff, success.c_str());
@@ -161,13 +162,6 @@ void Server::Register(){
 }
 
 void Server::changePassword() {
-    string uName = " Username:\n";
-    strcpy(sendingBuff, uName.c_str());
-    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-
-    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
-    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
-    uName = receivingBuff;
 
     memset(sendingBuff, 0, MAX);
     string pWord = " Please insert new password:\n";
@@ -182,29 +176,31 @@ void Server::changePassword() {
     string password;
     string inLine;
 
-    ifstream inputFile;
-    fstream tmpFile;
-    inputFile.open("users.txt", ios::in);
-    tmpFile.open("tmp.txt", ios_base::app | ios::out | ios::in); // temporary file
-    if (inputFile.is_open() && tmpFile.is_open()) {
-        while (getline(inputFile, inLine)) {
+    ifstream usersFile;
+    fstream tempFile;
+    usersFile.open("users.txt", ios::in);
+    tempFile.open("temp.txt", ios_base::app | ios::out | ios::in);
+    if (usersFile.is_open() && tempFile.is_open()) {
+        while (getline(usersFile, inLine)) {
             stringstream ss(inLine);
             ss >> username;
             ss >> password;
             string newLine = username;
             newLine += " ";
-            if (username == uName){
+            if (username == u.getUsername()){
                 newLine += newPassword;
+                u.setPassword(newPassword);
             }else{
                 newLine += password;
             }
             newLine += "\n";
-            tmpFile << newLine;
+            tempFile << newLine;
         }
     }
-    inputFile.close();
-    tmpFile.close();
-    rename("tmp.txt", "users.txt");
+
+    usersFile.close();
+    tempFile.close();
+    rename("temp.txt", "users.txt");
 
     memset(sendingBuff, 0, MAX);
     pWord = " Password changed successfully\n";
