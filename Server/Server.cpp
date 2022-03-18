@@ -22,8 +22,6 @@ Server::Server() {
     }
 
     std::thread threads[numThreads];
-    //cout << "Server started." << endl << endl;
-    //cout << "Server ready." << endl << endl;
 
     while(true) {
 
@@ -35,10 +33,6 @@ Server::Server() {
             }
 
             cout << "Connection accepted" << endl;
-            //struct newUser* newUserr = (struct newUser*)malloc(sizeof(struct newUser));
-            //newUserr->id = usersActive;
-            //newUserr->new_socket = new_socket;
-            //threads[usersActive] = std::thread(handleNewClient, newUserr);
             cout << "Handler assigned" << endl;
 
             mainMenu();
@@ -48,7 +42,6 @@ Server::Server() {
                 read(new_socket, receivingBuff, (size_t)MAX);
                 string choice = receivingBuff;
                 int choiceParsed = stoi(choice);
-                //while(choiceParsed > 0 || choiceParsed < 10){
                 switch(choiceParsed){
                     case 1:
                         subscribe();
@@ -72,13 +65,11 @@ Server::Server() {
                         notImplemented();
                         break;
                     case 8:
-                        //cout << "option 8 chosen" << endl;
                         changePassword();
                         break;
                     case 9:
                         logedIn = false;
                         mainMenu();
-                        //exit(EXIT_SUCCESS);
                         break;
                     default:
                         memset(sendingBuff, 0, MAX);
@@ -90,26 +81,7 @@ Server::Server() {
 
 
                 }
-                /*cout << choice << endl;
-                if(strcmp(receivingBuff, "1") == 0){
-                    //subscribe
-                } else if(strcmp(receivingBuff, "2") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "3") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "4") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "5") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "6") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "7") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "8") == 0) {
-                    //
-                } else if(strcmp(receivingBuff, "9") == 0) {
-                    //
-                }*/
+
             }
 
         }
@@ -146,32 +118,6 @@ bool Server::Login() {
     }else{
         return false;
     }
-    /*cout << " Username:" << endl;
-    cin >> username;
-    cout << endl << endl;
-
-    cout << " Password" << endl;
-    cin >> password;
-
-    string uName, pWord;
-    ifstream usersFile;
-    usersFile.open("users.txt");
-    if (usersFile.is_open())
-    {
-        usersFile >> uName >> pWord;
-        while (!usersFile.eof()) { // keep reading until end-of-file
-            if(uName == username && pWord == password){
-                cout << "Successfully logged in" << endl;
-                //User user = new User (username, password);
-                //optionsWhenLoggedIn(password);
-            }else{
-                cout << "Could not find the account, please register if you did not have done so or try again" << endl;
-            }
-            //cout << "Username: " << uName << "Password: " << pWord << endl;
-            usersFile >> uName >> pWord; // sets EOF flag if no value found
-        }
-        usersFile.close();
-    }*/
 
 }
 
@@ -212,27 +158,6 @@ void Server::Register(){
     string success = "Successfully Registered";
     strcpy(sendingBuff, success.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-    //cout << "Successfully Registered "<< endl;
-    /*string username, password;
-
-    cout << " Username:" << endl;
-    cin >> username;
-    cout << endl;
-
-    cout << " Password" << endl;
-    cin >> password;
-
-    ofstream usersFile;
-    usersFile.open("users.txt", fstream::app);
-    if (usersFile.is_open())
-    {
-        usersFile << username << "\t" << password << endl;
-        usersFile.close();
-    }
-    else cout << "Unable to open file";
-
-
-    cout << "Successfully Registered "<< endl;*/
 
 }
 
