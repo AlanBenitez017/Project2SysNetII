@@ -1,4 +1,4 @@
-#include "../Client/Client.hpp"
+#include "Client.hpp"
 
 void sendMsg(int client_fd);
 void receiveMsg(int client_fd);
@@ -6,11 +6,15 @@ void receiveMsg(int client_fd);
 int main(){
 
     Client c;
-    std::string ipAddress;
-    cout << "Enter hostname: ";
-    cin >> ipAddress;
-    if(ipAddress == "localhost")
-        ipAddress = "127.0.0.1";
+    string ipAddress;
+    do{
+        cout << "Enter hostname: ";
+        cin >> ipAddress;
+        if(ipAddress != "localhost"){
+            cout << "Can't find the hostname, try again" << endl;
+        }
+    }while(ipAddress != "localhost");
+    ipAddress = "127.0.0.1";
 
     if((c.client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
         perror("Could not make socket !!!");
@@ -29,12 +33,9 @@ int main(){
         close(c.client_fd);
         exit(EXIT_FAILURE);
     } else{
-        cout << "localhost resolved to 127.0.0.1" << endl << "Connected" << endl << endl;
+        cout << "localhost resolved to " << ipAddress << endl << "Connected" << endl << endl;
     }
 
-    //if(fork() == 0){
-    //cout << "In forked process" << endl;
-    //cout << "A client has connected" << endl;
     memset(c.sendingBuff, '\0', sizeof c.sendingBuff);
     memset(c.receivingBuff, '\0', sizeof c.receivingBuff);
 
@@ -63,7 +64,7 @@ int main(){
 
 void receiveMsg(int client_fd) {
     Client c;
-    while(1){
+    while(true){
         memset(c.receivingBuff, 0, MAX);
         cin.getline(c.receivingBuff, MAX);
         write(client_fd, c.receivingBuff, (size_t)MAX);
@@ -78,15 +79,14 @@ void receiveMsg(int client_fd) {
 
 void sendMsg(int client_fd) {
     Client c;
-    while(1){
+    while(true){
         if(c.exitClient){
             c.threadSending.detach();
             return;
         }
-        //eraseText(MAX);
         memset(c.sendingBuff, 0, MAX);
-        int bytesRecv = read(client_fd, c.sendingBuff, (size_t)MAX);
-        if(bytesRecv <= 0){
+        int bytesReceived = read(client_fd, c.sendingBuff, (size_t)MAX);
+        if(bytesReceived <= 0){
             continue;
         }
         cout << c.sendingBuff << endl;

@@ -130,7 +130,7 @@ void Server::Register(){
 
     strcpy(sendingBuff, uName.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    memset(receivingBuff, 0, MAX);   //might delete it later, already freeing it when calling this function
     read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
 
     username = receivingBuff;
@@ -140,7 +140,7 @@ void Server::Register(){
     write(new_socket, sendingBuff, (int)MAX);
     read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
     password = receivingBuff;
-    cout << "u: " << username << " p: "  << password << endl;
+    cout << "u: " << username << " p: "  << password << endl; //just to check
 
     ofstream usersFile;
     usersFile.open("users.txt", fstream::app);
@@ -193,7 +193,7 @@ void Server::changePassword() {
             ss >> password;
             string newLine = username;
             newLine += " ";
-            if (username.compare(uName) == 0){
+            if (username == uName){
                 newLine += newPassword;
             }else{
                 newLine += password;
@@ -204,10 +204,7 @@ void Server::changePassword() {
     }
     inputFile.close();
     tmpFile.close();
-    //fileWrite_mtx.lock();
     rename("tmp.txt", "users.txt");
-
-    //fileWrite_mtx.unlock();
 
     memset(sendingBuff, 0, MAX);
     pWord = " Password changed successfully\n";
@@ -233,6 +230,11 @@ void Server::mainMenu() {
             if(Login()){
                 optionsWhenLoggedIn();
                 logedIn = true;
+            }else{
+                string notFound = "Could not find the account";
+                strcpy(sendingBuff, notFound.c_str());
+                write(new_socket, sendingBuff, (int)MAX);
+                mainMenu();
             }
         }
         if(strcmp(receivingBuff, "2") == 0){

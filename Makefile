@@ -4,7 +4,7 @@ CXXFLAGS = -g -std=c++11 -Wall -pthread -Wall -Werror=return-type -Werror=uninit
 SRCS = $(wildcard *.hpp)
 OBJECTS = $(SRCS: .hpp=.o)
 
-all: clean server client
+all: server client
 
 server: $(OBJECTS) Server/main.cpp Server/User.hpp Server/User.cpp Server/Server.cpp Server/Server.hpp ##location.hpp location.cpp common.hpp
 		$(CXX) $(CXXFLAGS) -o $@ $^ 

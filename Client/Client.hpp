@@ -14,7 +14,6 @@
 #include <vector>
 #include <fstream>
 #include <thread>
-//#include "User.hpp"
 #define PORT 60010
 #define MAX 5000
 
@@ -29,12 +28,9 @@ public:
     int new_socket{};
     struct sockaddr_in address{};
     int addrLen{};
-    void optionsWhenLoggedIn(string password);
-    void changePassword(string password);
     bool exitClient = false;
     std::thread threadReceiving;
     std::thread threadSending;
-
 
 };
 
