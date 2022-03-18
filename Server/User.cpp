@@ -3,8 +3,52 @@
 #include <utility>
 
 User::User(string username, string password) {
-    this->username = std::move(username);
-    this->password = std::move(password);
+    this->username = username;
+    this->password = password;
+}
+
+User::User(){
+
+}
+
+void User::subscribe(string location){
+
+    this->locations.push_back(location);
+
+}
+
+bool User::unsubscribe(string location) {
+    /*int i = 0;
+    for(auto it = std::begin(locations); it != std::end(locations); ++it) {
+        cout << i << ": " << *it << "\n";
+        i++;
+    }*/
+    //vector<string>::iterator itr = std::find(arr.begin(), arr.end(), elem);
+    auto it = find(locations.begin(), locations.end(), location);
+    if (it == locations.end())
+    {
+        // name not in vector
+        return false;
+    } else
+    {
+        int index = std::distance(locations.begin(), it);
+        locations.erase(locations.begin() + index);
+        return true;
+    }
+
+
+
+
+}
+
+string User::seeLocations() {
+    string loc;
+    for (int i = 0; i < locations.size(); i++) {
+        // Printing the element at
+        // index 'i' of vector
+        loc += to_string(i) + ": "+ locations[i] + "\n";
+    }
+    return loc;
 }
 
 void User::optionsWhenLoggedIn() {

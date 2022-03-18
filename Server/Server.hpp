@@ -12,6 +12,7 @@
 #include <mutex>
 #include <fstream>
 #include <map>
+#include "User.hpp"
 
 #define MAX 5000
 #define PORT 60010
@@ -46,7 +47,10 @@ class Server{
         void mainMenu();
         bool checkLogin(string username, string password);
         void optionsWhenLoggedIn();
-
+        void subscribe();
+        void unsubscribe();
+        void seeLocations();
+        User u;
 
 
     };

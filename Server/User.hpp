@@ -4,6 +4,8 @@
 #include<string>
 #include<map>
 #include<fstream>
+#include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -13,11 +15,16 @@ class User{
 
     void Login();
         void Register();
+        User();
         User(string username, string password);
         string username;
         string password;
         void optionsWhenLoggedIn();
         std::map<string, string> users;
+        void subscribe(string location);
+        bool unsubscribe(string location);
+        string seeLocations();
+        vector<string> locations;
 };
 
 

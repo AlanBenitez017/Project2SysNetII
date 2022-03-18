@@ -42,7 +42,7 @@ Server::Server() {
             cout << "Handler assigned" << endl;
 
             mainMenu();
-            while(leave == false && logedIn == false){
+            while(logedIn == false){
                 memset(receivingBuff, 0, MAX);
                 read(new_socket, receivingBuff, (size_t)MAX);
                 if(strcmp(receivingBuff, "exit") == 0){
@@ -51,8 +51,8 @@ Server::Server() {
                 }
                 if(strcmp(receivingBuff, "1") == 0){
                     if(Login()){
-                        logedIn = true;
                         optionsWhenLoggedIn();
+                        logedIn = true;
                     }
                 }
                 if(strcmp(receivingBuff, "2") == 0){
@@ -61,8 +61,73 @@ Server::Server() {
                 }
             }
 
+            while(logedIn){
+                memset(receivingBuff, 0, MAX);
+                read(new_socket, receivingBuff, (size_t)MAX);
+                string choice = receivingBuff;
+                int choiceParsed = stoi(choice);
+                //while(choiceParsed > 0 || choiceParsed < 10){
+                switch(choiceParsed){
+                    case 1:
+                        subscribe();
+                        break;
+                    case 2:
+                        unsubscribe();
+                        cout << "option 2 chosen" << endl;
+                        break;
+                    case 3:
+                        cout << "option 3 chosen" << endl;
+                        break;
+                    case 4:
+                        cout << "option 4 chosen" << endl;
+                        break;
+                    case 5:
+                        cout << "option 5 chosen" << endl;
+                        break;
+                    case 6:
+                        seeLocations();
+                        cout << "option 6 chosen" << endl; //see all the locatons
+                        break;
+                    case 7:
+                        cout << "option 7 chosen" << endl;
+                        break;
+                    case 8:
+                        //cout << "option 8 chosen" << endl;
+                        //changePassword(password);
+                        break;
+                    case 9:
+                        exit(EXIT_SUCCESS);
+                        //break;
+                    default:
+                        //while(choiceParsed < 0 && choiceParsed > 9){
+                        cout << "invalid choice, please enter a valid choice" << endl;
+                        cin >> choiceParsed;
+                        break;
+                        //}
 
-
+                        //continue;
+                }
+                /*cout << choice << endl;
+                if(strcmp(receivingBuff, "1") == 0){
+                    //subscribe
+                } else if(strcmp(receivingBuff, "2") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "3") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "4") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "5") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "6") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "7") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "8") == 0) {
+                    //
+                } else if(strcmp(receivingBuff, "9") == 0) {
+                    //
+                }*/
+            }
 
         }
     }
@@ -269,7 +334,7 @@ void Server::optionsWhenLoggedIn() {
     cout << " 8. Change password" << endl;
     cout << " 9. Quit" << endl;*/
 
-    string choice;
+    /*string choice;
     cin >> choice;
     int choiceParsed = stoi(choice);
     //while(choiceParsed > 0 || choiceParsed < 10){
@@ -309,5 +374,65 @@ void Server::optionsWhenLoggedIn() {
             //}
 
             //continue;
+    }*/
+}
+
+void Server::subscribe(){
+    memset(sendingBuff, 0, MAX);
+    string locToSub = "Please enter a location to subscribe";
+    strcpy(sendingBuff, locToSub.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+
+    string location = receivingBuff;
+
+    u.subscribe(location);
+
+    memset(sendingBuff, 0, MAX);
+    locToSub = "Subscribed successfully";
+    strcpy(sendingBuff, locToSub.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    optionsWhenLoggedIn();
+}
+
+
+void Server::unsubscribe() {
+    memset(sendingBuff, 0, MAX);
+    string showLocations = u.seeLocations();
+    strcpy(sendingBuff, showLocations.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+
+    memset(sendingBuff, 0, MAX);
+    string locToSub = "Please enter a location to unsubscribe";
+    strcpy(sendingBuff, locToSub.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+
+    string location = receivingBuff;
+    if(u.unsubscribe(location)){
+        memset(sendingBuff, 0, MAX);
+        locToSub = "Unsubscribed successfully";
+        strcpy(sendingBuff, locToSub.c_str());
+        write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+        optionsWhenLoggedIn();
+    }else{
+        memset(sendingBuff, 0, MAX);
+        locToSub = "Could not find the location";
+        strcpy(sendingBuff, locToSub.c_str());
+        write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+        optionsWhenLoggedIn();
     }
+}
+
+void Server::seeLocations(){
+    memset(sendingBuff, 0, MAX);
+    string locations = u.seeLocations();
+    strcpy(sendingBuff, locations.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    optionsWhenLoggedIn();
+
 }
