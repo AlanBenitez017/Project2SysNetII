@@ -43,7 +43,7 @@ bool User::unsubscribe(string location) {
 
 string User::seeLocations() {
     string loc;
-    for (int i = 0; i < locations.size(); i++) {
+    for (unsigned int i = 0; i < locations.size(); i++) {
         // Printing the element at
         // index 'i' of vector
         loc += to_string(i) + ": "+ locations[i] + "\n";

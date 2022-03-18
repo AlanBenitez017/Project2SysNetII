@@ -11,6 +11,7 @@
 #include <thread>
 #include <mutex>
 #include <fstream>
+#include <sstream>
 #include <map>
 #include "User.hpp"
 
@@ -52,6 +53,7 @@ class Server{
         void seeLocations();
         User u;
         void notImplemented();
+        void changePassword();
 
 
     };

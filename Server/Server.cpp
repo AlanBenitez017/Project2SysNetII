@@ -73,7 +73,7 @@ Server::Server() {
                         break;
                     case 8:
                         //cout << "option 8 chosen" << endl;
-                        //changePassword(password);
+                        changePassword();
                         break;
                     case 9:
                         logedIn = false;
@@ -262,6 +262,62 @@ void Server::handleNewClient(struct newUser* user) {
     usersActive--;
     lock.unlock();
     std::terminate();
+}
+
+void Server::changePassword() {
+    string uName = " Username:\n";
+    strcpy(sendingBuff, uName.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+    uName = receivingBuff;
+
+    memset(sendingBuff, 0, MAX);
+    string pWord = " Please insert new password:\n";
+    strcpy(sendingBuff, pWord.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+
+    memset(receivingBuff, 0, MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+    string newPassword = receivingBuff;
+
+    string username;
+    string password;
+    string inLine;
+
+    ifstream inputFile;
+    fstream tmpFile;
+    inputFile.open("users.txt", ios::in);
+    tmpFile.open("tmp.txt", ios_base::app | ios::out | ios::in); // temporary file
+    if (inputFile.is_open() && tmpFile.is_open()) {
+        while (getline(inputFile, inLine)) {
+            stringstream ss(inLine);
+            ss >> username;
+            ss >> password;
+            string newLine = username;
+            newLine += " ";
+            if (username.compare(uName) == 0){
+                newLine += newPassword;
+            }else{
+                newLine += password;
+            }
+            newLine += "\n";
+            tmpFile << newLine;
+        }
+    }
+    inputFile.close();
+    tmpFile.close();
+    //fileWrite_mtx.lock();
+    rename("tmp.txt", "users.txt");
+
+    //fileWrite_mtx.unlock();
+
+    memset(sendingBuff, 0, MAX);
+    pWord = " Password changed successfully\n";
+    strcpy(sendingBuff, pWord.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    optionsWhenLoggedIn();
 }
 
 void Server::mainMenu() {
