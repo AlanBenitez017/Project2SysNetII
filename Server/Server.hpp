@@ -51,6 +51,7 @@ class Server{
         void unsubscribe();
         void seeLocations();
         User u;
+        void notImplemented();
 
 
     };

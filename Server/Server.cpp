@@ -42,24 +42,6 @@ Server::Server() {
             cout << "Handler assigned" << endl;
 
             mainMenu();
-            while(logedIn == false){
-                memset(receivingBuff, 0, MAX);
-                read(new_socket, receivingBuff, (size_t)MAX);
-                if(strcmp(receivingBuff, "exit") == 0){
-                    close(new_socket);
-                    exit(EXIT_SUCCESS);
-                }
-                if(strcmp(receivingBuff, "1") == 0){
-                    if(Login()){
-                        optionsWhenLoggedIn();
-                        logedIn = true;
-                    }
-                }
-                if(strcmp(receivingBuff, "2") == 0){
-                    Register();
-                    mainMenu();
-                }
-            }
 
             while(logedIn){
                 memset(receivingBuff, 0, MAX);
@@ -73,39 +55,40 @@ Server::Server() {
                         break;
                     case 2:
                         unsubscribe();
-                        cout << "option 2 chosen" << endl;
                         break;
                     case 3:
-                        cout << "option 3 chosen" << endl;
+                        notImplemented();
                         break;
                     case 4:
-                        cout << "option 4 chosen" << endl;
+                        notImplemented();
                         break;
                     case 5:
-                        cout << "option 5 chosen" << endl;
+                        notImplemented();
                         break;
                     case 6:
                         seeLocations();
-                        cout << "option 6 chosen" << endl; //see all the locatons
                         break;
                     case 7:
-                        cout << "option 7 chosen" << endl;
+                        notImplemented();
                         break;
                     case 8:
                         //cout << "option 8 chosen" << endl;
                         //changePassword(password);
                         break;
                     case 9:
-                        exit(EXIT_SUCCESS);
-                        //break;
-                    default:
-                        //while(choiceParsed < 0 && choiceParsed > 9){
-                        cout << "invalid choice, please enter a valid choice" << endl;
-                        cin >> choiceParsed;
+                        logedIn = false;
+                        mainMenu();
+                        //exit(EXIT_SUCCESS);
                         break;
-                        //}
+                    default:
+                        memset(sendingBuff, 0, MAX);
+                        string invalid = "Invalid choice, please try again";
+                        strcpy(sendingBuff, invalid.c_str());
+                        write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+                        optionsWhenLoggedIn();
+                        break;
 
-                        //continue;
+
                 }
                 /*cout << choice << endl;
                 if(strcmp(receivingBuff, "1") == 0){
@@ -286,6 +269,25 @@ void Server::mainMenu() {
     string firstOptions = "Welcome!\n  Press 1 to Login\n  Press 2 to Register\n  Type \'exit\' to Quit\n";
     strcpy(sendingBuff, firstOptions.c_str());
     write(new_socket, sendingBuff, (int)MAX);
+
+    while(logedIn == false){
+        memset(receivingBuff, 0, MAX);
+        read(new_socket, receivingBuff, (size_t)MAX);
+        if(strcmp(receivingBuff, "exit") == 0){
+            close(new_socket);
+            exit(EXIT_SUCCESS);
+        }
+        if(strcmp(receivingBuff, "1") == 0){
+            if(Login()){
+                optionsWhenLoggedIn();
+                logedIn = true;
+            }
+        }
+        if(strcmp(receivingBuff, "2") == 0){
+            Register();
+            mainMenu();
+        }
+    }
 }
 
 bool Server::checkLogin(string username, string password) {
@@ -299,9 +301,6 @@ bool Server::checkLogin(string username, string password) {
             if(uName == username && pWord == password){
                 return true;
             }
-//            }else{
-//                cout << "Could not find the account, please register if you did not have done so or try again" << endl;
-//            }
             usersFile >> uName >> pWord; // sets EOF flag if no value found
         }
         usersFile.close();
@@ -324,57 +323,6 @@ void Server::optionsWhenLoggedIn() {
     strcpy(sendingBuff, options.c_str());
     write(new_socket, sendingBuff, (int)MAX);
 
-    /*cout << " 1. Subscribe to a location" << endl;
-    cout << " 2. Unsubscribe to a location" << endl;
-    cout << " 3. See the online users" << endl;
-    cout << " 4. Send a message to a user" << endl;
-    cout << " 5. Send a group message to a location" << endl;
-    cout << " 6. See all the locations that the client has subscribed to" << endl;
-    cout << " 7. See the last 10 message received" << endl;
-    cout << " 8. Change password" << endl;
-    cout << " 9. Quit" << endl;*/
-
-    /*string choice;
-    cin >> choice;
-    int choiceParsed = stoi(choice);
-    //while(choiceParsed > 0 || choiceParsed < 10){
-    switch(choiceParsed){
-        case 1:
-            cout << "option 1 chosen" << endl;
-            break;
-        case 2:
-            cout << "option 2 chosen" << endl;
-            break;
-        case 3:
-            cout << "option 3 chosen" << endl;
-            break;
-        case 4:
-            cout << "option 4 chosen" << endl;
-            break;
-        case 5:
-            cout << "option 5 chosen" << endl;
-            break;
-        case 6:
-            cout << "option 6 chosen" << endl;
-            break;
-        case 7:
-            cout << "option 7 chosen" << endl;
-            break;
-        case 8:
-            //cout << "option 8 chosen" << endl;
-            //changePassword(password);
-            break;
-        case 9:
-            exit(EXIT_SUCCESS);
-            //break;
-        default:
-            //while(choiceParsed < 0 && choiceParsed > 9){
-            cout << "invalid choice, please enter a valid choice" << endl;
-            cin >> choiceParsed;
-            //}
-
-            //continue;
-    }*/
 }
 
 void Server::subscribe(){
@@ -435,4 +383,12 @@ void Server::seeLocations(){
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
     optionsWhenLoggedIn();
 
+}
+
+void Server::notImplemented() {
+    memset(sendingBuff, 0, MAX);
+    string notImplemented = "Not implemented for this part of the project";
+    strcpy(sendingBuff, notImplemented.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    optionsWhenLoggedIn();
 }
