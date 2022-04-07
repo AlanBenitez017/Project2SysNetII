@@ -9,6 +9,7 @@
 
 Server::Server() {
     id = 0;
+    usersActive = 0;
     addrLen = sizeof(address);
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("In socket");
@@ -33,23 +34,19 @@ Server::Server() {
     while(true) {
 
         printf("Waiting for incoming connection...\n");
-        if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrLen)) < 0) {
+        if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t * ) & addrLen)) < 0) {
             perror("In accept");
             exit(EXIT_FAILURE);
         }
-        cout << "Socket value before creating the thread" << new_socket << endl;
+        cout << "Socket value before creating the thread        " << new_socket << endl;
         threads.push_back(std::thread(&Server::run, this, new_socket, id));
+        id++;
 
-        for (auto & thread : threads)
-        {
-            if (thread.joinable())
-                thread.join();
-        }
 
     }
 }
 
-bool Server::Login() {
+bool Server::Login(int new_socket) {
     memset(receivingBuff, 0, MAX);
     memset(sendingBuff, 0, MAX);
 
@@ -73,6 +70,8 @@ bool Server::Login() {
     if(checkLogin(username, password)){
         User userr(username, password, new_socket, id);
         users.push_back(userr);
+        usersActive++;
+        cout << "Users active: " << usersActive << endl;
         //u.setUsername(username);
         //u.setPassword(password);
         memset(sendingBuff, 0, MAX);
@@ -96,14 +95,50 @@ void Server::run(int new_socket, int id){
     while(loggedIn){
         memset(receivingBuff, 0, MAX);
         read(new_socket, receivingBuff, (size_t)MAX);
-        string choice = receivingBuff;
-        int choiceParsed = stoi(choice);
-        switch(choiceParsed){
-            case 1:
-                subscribe();
+        //string choice = receivingBuff;
+        //int choiceParsed = stoi(choice);
+        if(strcmp(receivingBuff, "1")==0){
+            subscribe(new_socket);
+            break;
+        }else if(strcmp(receivingBuff, "2")==0){
+            unsubscribe(new_socket);
+            break;
+        }else if(strcmp(receivingBuff, "3")==0){
+            notImplemented();
+            break;
+        }else if(strcmp(receivingBuff, "4")==0){
+            notImplemented();
+            break;
+        }else if(strcmp(receivingBuff, "5")==0){
+            notImplemented();
+            break;
+        }else if(strcmp(receivingBuff, "6")==0){
+            seeLocations(new_socket);
+            break;
+        }else if(strcmp(receivingBuff, "7")==0){
+            notImplemented();
+            break;
+        }else if(strcmp(receivingBuff, "8")==0){
+            changePassword(new_socket);
+            break;
+        }else if(strcmp(receivingBuff, "9")==0){
+            loggedIn = false;
+            usersActive--;
+            mainMenu(new_socket);
+            break;
+        }else{
+            memset(sendingBuff, 0, MAX);
+            string invalid = "Invalid choice, please try again";
+            strcpy(sendingBuff, invalid.c_str());
+            write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+            optionsWhenLoggedIn(new_socket);
+        }
+        /*switch(choice){
+            case "1":
+
                 break;
-            case 2:
-                unsubscribe();
+            case "2":
+                unsubscribe(new_socket);
                 break;
             case 3:
                 notImplemented();
@@ -115,7 +150,7 @@ void Server::run(int new_socket, int id){
                 notImplemented();
                 break;
             case 6:
-                seeLocations();
+                seeLocations(new_socket);
                 break;
             case 7:
                 notImplemented();
@@ -132,16 +167,13 @@ void Server::run(int new_socket, int id){
                 string invalid = "Invalid choice, please try again";
                 strcpy(sendingBuff, invalid.c_str());
                 write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-                optionsWhenLoggedIn();
+                optionsWhenLoggedIn(new_socket);
                 break;
-
-
-        }
-
+        }*/
     }
 }
 
-void Server::Register(){
+void Server::Register(int new_socket){
     memset(receivingBuff, 0, MAX);
     memset(sendingBuff, 0, MAX);
 
@@ -179,7 +211,7 @@ void Server::Register(){
 
 }
 
-void Server::changePassword() {
+void Server::changePassword(int new_socket) {
 
     memset(sendingBuff, 0, MAX);
     string pWord = " Please insert new password:\n";
@@ -224,7 +256,7 @@ void Server::changePassword() {
     pWord = " Password changed successfully\n";
     strcpy(sendingBuff, pWord.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    optionsWhenLoggedIn();
+    optionsWhenLoggedIn(new_socket);
 }
 
 void Server::mainMenu(int new_socket) {
@@ -241,8 +273,8 @@ void Server::mainMenu(int new_socket) {
             exit(EXIT_SUCCESS);
         }
         if(strcmp(receivingBuff, "1") == 0){
-            if(Login()){
-                optionsWhenLoggedIn();
+            if(Login(new_socket)){
+                optionsWhenLoggedIn(new_socket);
                 //isActive = true;
                 loggedIn = true;
             }else{
@@ -253,7 +285,7 @@ void Server::mainMenu(int new_socket) {
             }
         }
         if(strcmp(receivingBuff, "2") == 0){
-            Register();
+            Register(new_socket);
             mainMenu(new_socket);
         }
     }
@@ -277,7 +309,7 @@ bool Server::checkLogin(string username, string password) {
     return false;
 }
 
-void Server::optionsWhenLoggedIn() {
+void Server::optionsWhenLoggedIn(int new_socket) {
     memset(sendingBuff, 0, MAX);
     string options;
     options = " 1. Subscribe to a location\n";
@@ -294,7 +326,7 @@ void Server::optionsWhenLoggedIn() {
 
 }
 
-void Server::subscribe(){
+void Server::subscribe(int new_socket){
     memset(sendingBuff, 0, MAX);
     string locToSub = "Please enter a location to subscribe";
     strcpy(sendingBuff, locToSub.c_str());
@@ -311,11 +343,11 @@ void Server::subscribe(){
     locToSub = "Subscribed successfully";
     strcpy(sendingBuff, locToSub.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    optionsWhenLoggedIn();
+    optionsWhenLoggedIn(new_socket);
 }
 
 
-void Server::unsubscribe() {
+void Server::unsubscribe(int new_socket) {
     memset(sendingBuff, 0, MAX);
     string showLocations = u.seeLocations();
     strcpy(sendingBuff, showLocations.c_str());
@@ -335,22 +367,27 @@ void Server::unsubscribe() {
         locToSub = "Unsubscribed successfully";
         strcpy(sendingBuff, locToSub.c_str());
         write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-        optionsWhenLoggedIn();
+        optionsWhenLoggedIn(new_socket);
     }else{
         memset(sendingBuff, 0, MAX);
         locToSub = "Could not find the location";
         strcpy(sendingBuff, locToSub.c_str());
         write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-        optionsWhenLoggedIn();
+        optionsWhenLoggedIn(new_socket);
     }
 }
 
-void Server::seeLocations(){
+void Server::seeLocations(int new_socket, int id){
     memset(sendingBuff, 0, MAX);
-    string locations = u.seeLocations();
+    //string locations = u.seeLocations();
+    for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+
+        }
+    }
     strcpy(sendingBuff, locations.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    optionsWhenLoggedIn();
+    optionsWhenLoggedIn(new_socket);
 
 }
 
@@ -359,5 +396,5 @@ void Server::notImplemented() {
     string notImplemented = "Not implemented for this part of the project";
     strcpy(sendingBuff, notImplemented.c_str());
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    optionsWhenLoggedIn();
+    optionsWhenLoggedIn(new_socket);
 }

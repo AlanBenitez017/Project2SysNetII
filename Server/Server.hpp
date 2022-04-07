@@ -40,20 +40,21 @@ class Server{
         Server();
         //std::map<string, string> users;
         bool loggedIn = false;
-        bool Login();
-        void Register();
+        bool Login(int new_socket);
+        void Register(int new_socket);
         void mainMenu(int new_socket);
         bool checkLogin(string username, string password);
-        void optionsWhenLoggedIn();
-        void subscribe();
-        void unsubscribe();
-        void seeLocations();
+        void optionsWhenLoggedIn(int new_socket);
+        void subscribe(int new_socket);
+        void unsubscribe(int new_socket);
+        void seeLocations(int new_socket, int id);
         User u;
         void notImplemented();
-        void changePassword();
+        void changePassword(int new_socket);
         void run(int socket, int id);
         vector<thread> threads;
         vector<User> users;
+        int usersActive;
 
 
     };
