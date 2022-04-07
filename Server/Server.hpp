@@ -45,8 +45,8 @@ class Server{
         void mainMenu(int new_socket);
         bool checkLogin(string username, string password);
         void optionsWhenLoggedIn(int new_socket);
-        void subscribe(int new_socket);
-        void unsubscribe(int new_socket);
+        void subscribe(int new_socket, int id);
+        void unsubscribe(int new_socket, int id);
         void seeLocations(int new_socket, int id);
         User u;
         void notImplemented();
