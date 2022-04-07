@@ -1,6 +1,6 @@
 /***************************************************************
   Student Name: Alan Benitez
-  File Name: Srver.cpp
+  File Name: Server.cpp
   Project 2
 
   In this file I develop the responses from the client. Will add the new users to a .txt file and does the communication with the client
@@ -8,6 +8,7 @@
 #include "Server.hpp"
 
 Server::Server() {
+    id = 0;
     addrLen = sizeof(address);
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("In socket");
@@ -36,61 +37,15 @@ Server::Server() {
             perror("In accept");
             exit(EXIT_FAILURE);
         }
+        cout << "Socket value before creating the thread" << new_socket << endl;
+        threads.push_back(std::thread(&Server::run, this, new_socket, id));
 
-        if(fork() == 0){
-            cout << "Connection accepted" << endl;
-            cout << "Handler assigned" << endl;
-
-            mainMenu();
-
-            while(loggedIn){
-                memset(receivingBuff, 0, MAX);
-                read(new_socket, receivingBuff, (size_t)MAX);
-                string choice = receivingBuff;
-                int choiceParsed = stoi(choice);
-                switch(choiceParsed){
-                    case 1:
-                        subscribe();
-                        break;
-                    case 2:
-                        unsubscribe();
-                        break;
-                    case 3:
-                        notImplemented();
-                        break;
-                    case 4:
-                        notImplemented();
-                        break;
-                    case 5:
-                        notImplemented();
-                        break;
-                    case 6:
-                        seeLocations();
-                        break;
-                    case 7:
-                        notImplemented();
-                        break;
-                    case 8:
-                        changePassword();
-                        break;
-                    case 9:
-                        loggedIn = false;
-                        mainMenu();
-                        break;
-                    default:
-                        memset(sendingBuff, 0, MAX);
-                        string invalid = "Invalid choice, please try again";
-                        strcpy(sendingBuff, invalid.c_str());
-                        write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-                        optionsWhenLoggedIn();
-                        break;
-
-
-                }
-
-            }
-
+        for (auto & thread : threads)
+        {
+            if (thread.joinable())
+                thread.join();
         }
+
     }
 }
 
@@ -116,8 +71,10 @@ bool Server::Login() {
     cout << "u: " << username << " p: "  << password << endl;
 
     if(checkLogin(username, password)){
-        u.setUsername(username);
-        u.setPassword(password);
+        User userr(username, password, new_socket, id);
+        users.push_back(userr);
+        //u.setUsername(username);
+        //u.setPassword(password);
         memset(sendingBuff, 0, MAX);
         string loggedIn = "Successfully Logged In";
         strcpy(sendingBuff, loggedIn.c_str());
@@ -129,6 +86,60 @@ bool Server::Login() {
 
 }
 
+void Server::run(int new_socket, int id){
+    cout << "Connection accepted" << endl;
+    cout << "Handler assigned" << endl;
+    id++;
+    cout << "ID #" << id << endl;
+    mainMenu(new_socket);
+
+    while(loggedIn){
+        memset(receivingBuff, 0, MAX);
+        read(new_socket, receivingBuff, (size_t)MAX);
+        string choice = receivingBuff;
+        int choiceParsed = stoi(choice);
+        switch(choiceParsed){
+            case 1:
+                subscribe();
+                break;
+            case 2:
+                unsubscribe();
+                break;
+            case 3:
+                notImplemented();
+                break;
+            case 4:
+                notImplemented();
+                break;
+            case 5:
+                notImplemented();
+                break;
+            case 6:
+                seeLocations();
+                break;
+            case 7:
+                notImplemented();
+                break;
+            case 8:
+                changePassword();
+                break;
+            case 9:
+                loggedIn = false;
+                mainMenu(new_socket);
+                break;
+            default:
+                memset(sendingBuff, 0, MAX);
+                string invalid = "Invalid choice, please try again";
+                strcpy(sendingBuff, invalid.c_str());
+                write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+                optionsWhenLoggedIn();
+                break;
+
+
+        }
+
+    }
+}
 
 void Server::Register(){
     memset(receivingBuff, 0, MAX);
@@ -216,7 +227,7 @@ void Server::changePassword() {
     optionsWhenLoggedIn();
 }
 
-void Server::mainMenu() {
+void Server::mainMenu(int new_socket) {
     memset(sendingBuff, 0, MAX);
     string firstOptions = "Welcome!\n  Press 1 to Login\n  Press 2 to Register\n  Type \'exit\' to Quit\n";
     strcpy(sendingBuff, firstOptions.c_str());
@@ -232,17 +243,18 @@ void Server::mainMenu() {
         if(strcmp(receivingBuff, "1") == 0){
             if(Login()){
                 optionsWhenLoggedIn();
+                //isActive = true;
                 loggedIn = true;
             }else{
                 string notFound = "Could not find the account";
                 strcpy(sendingBuff, notFound.c_str());
                 write(new_socket, sendingBuff, (int)MAX);
-                mainMenu();
+                mainMenu(new_socket);
             }
         }
         if(strcmp(receivingBuff, "2") == 0){
             Register();
-            mainMenu();
+            mainMenu(new_socket);
         }
     }
 }

@@ -8,9 +8,11 @@
 
 #include "User.hpp"
 
-User::User(string username, string password) {
+User::User(string username, string password, int new_socket, int id) {
     this->username = username;
     this->password = password;
+    this->new_socket = new_socket;
+    this->id = id;
 }
 
 User::User(){
@@ -26,12 +28,28 @@ string User::getPassword(){
     return password;
 }
 
+int User::getNewSocket() {
+    return new_socket;
+}
+
+int User::getId(){
+    return id;
+}
+
 void User::setUsername(string username){
     this->username = username;
 }
 
 void User::setPassword(string password) {
     this->password = password;
+}
+
+void User::setNewSocket(int new_socket) {
+    this->new_socket = new_socket;
+}
+
+void User::setId(int id) {
+    this->id = id;
 }
 
 void User::subscribe(string location){

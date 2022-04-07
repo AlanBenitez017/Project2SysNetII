@@ -22,18 +22,26 @@ class User{
     public:
 
         User();
-        User(string username, string password);
+        User(string username, string password, int new_socket, int id);
         string username;
         string password;
+        int new_socket;
+        int id;
         string getUsername();
         string getPassword();
+        int getNewSocket();
+        int getId();
         void setUsername(string username);
         void setPassword(string password);
-        std::map<string, string> users;
+        void setNewSocket(int new_socket);
+        void setId(int id);
+        //std::map<string, string> users;
         void subscribe(string location);
         bool unsubscribe(string location);
         string seeLocations();
         vector<string> locations;
+        bool isActive = false;
+
 };
 
 

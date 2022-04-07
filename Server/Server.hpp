@@ -32,16 +32,17 @@ class Server{
     public:
         int server_fd;
         int new_socket;
+        int id;
         char sendingBuff[MAX];
         char receivingBuff[MAX];
         struct sockaddr_in address;
         int addrLen;
         Server();
-        std::map<string, string> users;
+        //std::map<string, string> users;
         bool loggedIn = false;
         bool Login();
         void Register();
-        void mainMenu();
+        void mainMenu(int new_socket);
         bool checkLogin(string username, string password);
         void optionsWhenLoggedIn();
         void subscribe();
@@ -50,6 +51,9 @@ class Server{
         User u;
         void notImplemented();
         void changePassword();
+        void run(int socket, int id);
+        vector<thread> threads;
+        vector<User> users;
 
 
     };
