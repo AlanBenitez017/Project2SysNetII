@@ -446,7 +446,7 @@ void Server::seeLocations(int new_socket, int id){
 
 }
 
-void Server::sendMsgToAUser(int new_socket, int id){
+void Server::sendMsgToAUser(int new_socket, int id){        //SOS :(
     memset(sendingBuff, 0, MAX);
     string prompt = "Please choose what user you would like to send the message\n";
     for(int i = 0; i < users.size(); i++){
@@ -455,7 +455,7 @@ void Server::sendMsgToAUser(int new_socket, int id){
     strcpy(sendingBuff, prompt.c_str());
     write(new_socket, sendingBuff, (int)MAX);
 
-    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    memset(receivingBuff, 0, MAX);
     read(new_socket, receivingBuff, (size_t)MAX);
 
     memset(sendingBuff, 0, MAX);
@@ -463,12 +463,12 @@ void Server::sendMsgToAUser(int new_socket, int id){
     strcpy(sendingBuff, msg.c_str());
     write(new_socket, sendingBuff, (int)MAX);
 
-    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    memset(receivingBuff, 0, MAX);
     read(new_socket, receivingBuff, (size_t)MAX);
 
     for(int i = 0; i < users.size(); i++){
         if(users[i].getId() == id){
-            users[i].addMsg(receivingBuff);
+            users[i].addMsg(receivingBuff);     //adding to the vector of msgs
         }
     }
     optionsWhenLoggedIn(new_socket);
@@ -479,7 +479,7 @@ void Server::seeLast10Msg(int new_socket, int id){
     string msgs;
     for(int i = 0; i < users.size(); i++){
         if(users[i].getId() == id){
-            msgs += users[i].seeLast10Msg();
+            msgs += users[i].seeLast10Msg();   //actually showing last 10 msgs sent, gotta change it
         }
     }
     strcpy(sendingBuff, msgs.c_str());
