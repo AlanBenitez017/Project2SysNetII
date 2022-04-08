@@ -40,6 +40,13 @@ Server::Server() {
         cout << "Socket value before creating the thread        " << new_socket << endl;
         id++;
         threads.push_back(std::thread(&Server::run, this, new_socket, id));
+
+
+    }
+    for (size_t i = 0; i < threads.size(); i++)
+    {
+        if (threads[i].joinable())
+            threads[i].join();
     }
 }
 
@@ -61,19 +68,33 @@ void Server::run(int new_socket, int id){
         }else if(strcmp(receivingBuff, "2") == 0){
             unsubscribe(new_socket, id);
         }else if(strcmp(receivingBuff, "3") == 0){
-            notImplemented();
+            seeActiveUsers(new_socket, id);
         }else if(strcmp(receivingBuff, "4") == 0){
-            notImplemented();
+            sendMsgToAUser(new_socket, id);
         }else if(strcmp(receivingBuff, "5") == 0){
             notImplemented();
         }else if(strcmp(receivingBuff, "6") == 0){
             seeLocations(new_socket, id);
         }else if(strcmp(receivingBuff, "7") == 0){
-            notImplemented();
+            //notImplemented();
+            seeLast10Msg(new_socket, id);
         }else if(strcmp(receivingBuff, "8") == 0){
             changePassword(new_socket, id);
         }else if(strcmp(receivingBuff, "9") == 0){
             loggedIn = false;
+            for (size_t i = 0; i < users.size(); i++)
+            {
+                if (users[i].getId() == id)
+                {
+                    users.erase(users.begin() + i);
+                    break;
+                }
+            }
+            //users.erase(std::remove(users.begin(), users.end(), users[id]), users.end());
+            //auto it = find(users.begin(), users.end(), users[id].getId());
+            //int index = std::distance(users.begin(), it);
+            //users.erase(users.begin() + index);
+
             usersActive--;
             mainMenu(new_socket, id);
         }else{
@@ -399,6 +420,18 @@ void Server::unsubscribe(int new_socket, int id){
     }*/
 }
 
+void Server::seeActiveUsers(int new_socket, int id){
+    memset(sendingBuff, 0, MAX);
+    string activeUserss;
+    for(int i = 0; i < users.size(); i++){
+        activeUserss += to_string(i) + ": " + users[i].getUsername() + "\n";
+    }
+    strcpy(sendingBuff, activeUserss.c_str());
+    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
+    optionsWhenLoggedIn(new_socket);
+
+}
+
 void Server::seeLocations(int new_socket, int id){
     memset(sendingBuff, 0, MAX);
     string locations = "";
@@ -411,6 +444,47 @@ void Server::seeLocations(int new_socket, int id){
     write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
     optionsWhenLoggedIn(new_socket);
 
+}
+
+void Server::sendMsgToAUser(int new_socket, int id){
+    memset(sendingBuff, 0, MAX);
+    string prompt = "Please choose what user you would like to send the message\n";
+    for(int i = 0; i < users.size(); i++){
+        prompt += to_string(i) + ": " + users[i].getUsername() + "\n";
+    }
+    strcpy(sendingBuff, prompt.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);
+
+    memset(sendingBuff, 0, MAX);
+    string msg = "Enter the message: ";
+    strcpy(sendingBuff, msg.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+
+    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
+    read(new_socket, receivingBuff, (size_t)MAX);
+
+    for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+            users[i].addMsg(receivingBuff);
+        }
+    }
+    optionsWhenLoggedIn(new_socket);
+}
+
+void Server::seeLast10Msg(int new_socket, int id){
+    memset(sendingBuff, 0, MAX);
+    string msgs;
+    for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+            msgs += users[i].seeLast10Msg();
+        }
+    }
+    strcpy(sendingBuff, msgs.c_str());
+    write(new_socket, sendingBuff, (int)MAX);
+    optionsWhenLoggedIn(new_socket);
 }
 
 void Server::notImplemented() {

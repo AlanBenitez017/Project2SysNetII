@@ -52,6 +52,10 @@ void User::setId(int id) {
     this->id = id;
 }
 
+void User::addMsg(string msg){
+    this->messages.push_back(msg);
+}
+
 void User::subscribe(string location){
     this->locations.push_back(location);
 }
@@ -74,6 +78,18 @@ string User::seeLocations() {
         loc += to_string(i) + ": "+ locations[i] + "\n";
     }
     return loc;
+}
+
+string User::seeLast10Msg() {
+    string msgs;
+    for (unsigned int i = 0; i < messages.size(); i++) {
+        if(messages.empty()){
+            msgs = "There is no messages";
+        }else {
+            msgs += messages[i] + "\n";
+        }
+    }
+    return msgs;
 }
 
 

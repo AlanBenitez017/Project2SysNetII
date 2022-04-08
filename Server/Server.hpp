@@ -48,6 +48,9 @@ class Server{
         void subscribe(int new_socket, int id);
         void unsubscribe(int new_socket, int id);
         void seeLocations(int new_socket, int id);
+        void seeActiveUsers(int new_socket, int id);
+        void sendMsgToAUser(int new_socket, int id);
+        void seeLast10Msg(int new_socket, int id);
         //User u;
         void notImplemented();
         void changePassword(int new_socket, int id);

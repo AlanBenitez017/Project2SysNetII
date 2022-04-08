@@ -38,8 +38,11 @@ class User{
         //std::map<string, string> users;
         void subscribe(string location);
         bool unsubscribe(string location);
+        void addMsg(string msg);
+        string seeLast10Msg();
         string seeLocations();
         vector<string> locations;
+        vector<string> messages;
         bool isActive = false;
 
 };
