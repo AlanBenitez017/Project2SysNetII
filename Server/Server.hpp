@@ -30,6 +30,7 @@ using namespace std;
 class Server{
 
     public:
+        mutex mtx;
         int server_fd;
         int new_socket;
         int id;
@@ -51,6 +52,7 @@ class Server{
         void seeActiveUsers(int new_socket, int id);
         void sendMsgToAUser(int new_socket, int id);
         void seeLast10Msg(int new_socket, int id);
+        int getIndex(vector<User> users, string username);
         //User u;
         void notImplemented();
         void changePassword(int new_socket, int id);

@@ -447,31 +447,47 @@ void Server::seeLocations(int new_socket, int id){
 }
 
 void Server::sendMsgToAUser(int new_socket, int id){        //SOS :(
+    mtx.lock();
     memset(sendingBuff, 0, MAX);
     string prompt = "Please choose what user you would like to send the message\n";
     for(int i = 0; i < users.size(); i++){
-        prompt += to_string(i) + ": " + users[i].getUsername() + "\n";
+        prompt += to_string(i) + ": " + users[i].getUsername() + "\n"; //imprime los users conectadps
     }
     strcpy(sendingBuff, prompt.c_str());
-    write(new_socket, sendingBuff, (int)MAX);
+    write(new_socket, sendingBuff, (int)MAX); //envio AL CLIENTE los users coenctados
 
     memset(receivingBuff, 0, MAX);
-    read(new_socket, receivingBuff, (size_t)MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);  //recibe RESPUESTA DEL MISMO USUARIO, con ell nombre del usuario
+    string userToSendTo = receivingBuff;
 
     memset(sendingBuff, 0, MAX);
     string msg = "Enter the message: ";
     strcpy(sendingBuff, msg.c_str());
-    write(new_socket, sendingBuff, (int)MAX);
-
+    write(new_socket, sendingBuff, (int)MAX);   //ENVIA AL CLIENTE "ENTER THE MESSAGE"
     memset(receivingBuff, 0, MAX);
-    read(new_socket, receivingBuff, (size_t)MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);   //LEE LO QUE EL MISMO CLIENTE ESCRIBIO
 
     for(int i = 0; i < users.size(); i++){
-        if(users[i].getId() == id){
-            users[i].addMsg(receivingBuff);     //adding to the vector of msgs
+        if(users[i].getUsername() == userToSendTo){
+            //read(users[i].getNewSocket(), receivingBuff, (size_t)MAX);
+            users[i].addMsg(receivingBuff);
+            write(users[i].getNewSocket(), receivingBuff, (int)MAX);
+            //memset(receivingBuff, 0, MAX);
+            //read(users[i].getNewSocket(), receivingBuff, (size_t)MAX);
+            break;
         }
     }
+    //write(new_socket, sendingBuff, (int)MAX);
+
+
+
+    /*for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+                 //adding to the vector of msgs
+        }
+    }*/
     optionsWhenLoggedIn(new_socket);
+    mtx.unlock();
 }
 
 void Server::seeLast10Msg(int new_socket, int id){
