@@ -52,13 +52,14 @@ class Server{
         void seeActiveUsers(int new_socket, int id);
         void sendMsgToAUser(int new_socket, int id);
         void seeLast10Msg(int new_socket, int id);
-        int getIndex(vector<User> users, string username);
+        void sendMsgToALocation(int new_socket, int id);
         //User u;
         void notImplemented();
         void changePassword(int new_socket, int id);
         void run(int socket, int id);
         vector<thread> threads;
         vector<User> users;
+        vector<string> locations;
         int usersActive;
 
 

@@ -8,11 +8,12 @@
 
 #include "User.hpp"
 
-User::User(string username, string password, int new_socket, int id) {
+User::User(string username, string password, int new_socket, int id, vector<string> locations) {
     this->username = username;
     this->password = password;
     this->new_socket = new_socket;
     this->id = id;
+    this->locations = locations;
 }
 
 User::User(){
@@ -58,6 +59,10 @@ void User::addMsg(string msg){
 
 void User::subscribe(string location){
     this->locations.push_back(location);
+}
+
+vector<string> User::getLocations() {
+    return locations;
 }
 
 bool User::unsubscribe(string location) {

@@ -22,7 +22,7 @@ class User{
     public:
 
         User();
-        User(string username, string password, int new_socket, int id);
+        User(string username, string password, int new_socket, int id, vector<string> locations);
         string username;
         string password;
         int new_socket;
@@ -41,6 +41,8 @@ class User{
         void addMsg(string msg);
         string seeLast10Msg();
         string seeLocations();
+        vector<string> getLocations();
+        string sendMsgToLocation();
         vector<string> locations;
         vector<string> messages;
         bool isActive = false;
