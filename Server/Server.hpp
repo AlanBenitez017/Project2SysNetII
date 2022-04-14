@@ -39,7 +39,6 @@ class Server{
         struct sockaddr_in address;
         int addrLen;
         Server();
-        //std::map<string, string> users;
         bool loggedIn = false;
         bool Login(int new_socket, int id);
         void Register(int new_socket);
@@ -53,13 +52,10 @@ class Server{
         void sendMsgToAUser(int new_socket, int id);
         void seeLast10Msg(int new_socket, int id);
         void sendMsgToALocation(int new_socket, int id);
-        //User u;
-        void notImplemented();
         void changePassword(int new_socket, int id);
         void run(int socket, int id);
         vector<thread> threads;
         vector<User> users;
-        vector<string> locations;
         int usersActive;
 
 

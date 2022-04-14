@@ -37,7 +37,6 @@ Server::Server() {
             perror("In accept");
             exit(EXIT_FAILURE);
         }
-        cout << "Socket value before creating the thread        " << new_socket << endl;
         id++;
         threads.push_back(std::thread(&Server::run, this, new_socket, id));
 
@@ -56,13 +55,10 @@ void Server::run(int new_socket, int id){
     cout << "Handler assigned" << endl;
     cout << "ID #" << id << endl;
     mainMenu(new_socket, id);
-    //id++;
 
     while(loggedIn){
         memset(receivingBuff, 0, MAX);
         read(new_socket, receivingBuff, (size_t)MAX);
-        //string choice = receivingBuff;
-        //int choiceParsed = stoi(choice);
         if(strcmp(receivingBuff, "1") == 0){
             subscribe(new_socket, id);
         }else if(strcmp(receivingBuff, "2") == 0){
@@ -76,7 +72,6 @@ void Server::run(int new_socket, int id){
         }else if(strcmp(receivingBuff, "6") == 0){
             seeLocations(new_socket, id);
         }else if(strcmp(receivingBuff, "7") == 0){
-            //notImplemented();
             seeLast10Msg(new_socket, id);
         }else if(strcmp(receivingBuff, "8") == 0){
             changePassword(new_socket, id);
@@ -90,11 +85,6 @@ void Server::run(int new_socket, int id){
                     break;
                 }
             }
-            //users.erase(std::remove(users.begin(), users.end(), users[id]), users.end());
-            //auto it = find(users.begin(), users.end(), users[id].getId());
-            //int index = std::distance(users.begin(), it);
-            //users.erase(users.begin() + index);
-
             usersActive--;
             mainMenu(new_socket, id);
         }else{
@@ -103,45 +93,7 @@ void Server::run(int new_socket, int id){
             strcpy(sendingBuff, invalid.c_str());
             write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
             optionsWhenLoggedIn(new_socket);
-            //break;
         }
-        /*switch(choice){
-            case "1":
-
-                break;
-            case "2":
-                unsubscribe(new_socket);
-                break;
-            case 3:
-                notImplemented();
-                break;
-            case 4:
-                notImplemented();
-                break;
-            case 5:
-                notImplemented();
-                break;
-            case 6:
-                seeLocations(new_socket);
-                break;
-            case 7:
-                notImplemented();
-                break;
-            case 8:
-                changePassword();
-                break;
-            case 9:
-                loggedIn = false;
-                mainMenu(new_socket);
-                break;
-            default:
-                memset(sendingBuff, 0, MAX);
-                string invalid = "Invalid choice, please try again";
-                strcpy(sendingBuff, invalid.c_str());
-                write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-                optionsWhenLoggedIn(new_socket);
-                break;
-        }*/
     }
 }
 
@@ -154,9 +106,9 @@ bool Server::Login(int new_socket, int id) {
     string uName = " Username:\n";
 
     strcpy(sendingBuff, uName.c_str());
-    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
-    memset(receivingBuff, 0, MAX);   //might delete it later, already deleted it when calling this function
-    read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
+    write(new_socket, sendingBuff, (int)MAX);
+    memset(receivingBuff, 0, MAX);
+    read(new_socket, receivingBuff, (size_t)MAX);
 
     username = receivingBuff;
     memset(sendingBuff, 0, MAX);
@@ -168,15 +120,13 @@ bool Server::Login(int new_socket, int id) {
     cout << "u: " << username << " p: "  << password << endl;
 
     if(checkLogin(username, password)){
-        User userr(username, password, new_socket, id, locations);
+        User userr(username, password, new_socket, id);
         users.push_back(userr);
         usersActive++;
         cout << "Users active: " << usersActive << endl;
-        //u.setUsername(username);
-        //u.setPassword(password);
         memset(sendingBuff, 0, MAX);
-        string loggedIn = "Successfully Logged In";
-        strcpy(sendingBuff, loggedIn.c_str());
+        string logged = "Successfully Logged In";
+        strcpy(sendingBuff, logged.c_str());
         write(new_socket, sendingBuff, (int)MAX);
         return true;
     }else{
@@ -187,6 +137,7 @@ bool Server::Login(int new_socket, int id) {
 
 
 void Server::Register(int new_socket){
+    mtx.lock();
     memset(receivingBuff, 0, MAX);
     memset(sendingBuff, 0, MAX);
 
@@ -205,7 +156,7 @@ void Server::Register(int new_socket){
     write(new_socket, sendingBuff, (int)MAX);
     read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
     password = receivingBuff;
-    cout << "u: " << username << " p: "  << password << endl; //just to check
+    cout << "u: " << username << " p: "  << password << endl; //just to check, sends to the server terminal
 
     ofstream usersFile;
     usersFile.open("users.txt", fstream::app);
@@ -221,11 +172,10 @@ void Server::Register(int new_socket){
     string success = "Successfully Registered";
     strcpy(sendingBuff, success.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-
+    mtx.unlock();
 }
 
 void Server::changePassword(int new_socket, int id) {
-
     mtx.lock();
     memset(sendingBuff, 0, MAX);
     string pWord = " Please insert new password:\n";
@@ -236,6 +186,16 @@ void Server::changePassword(int new_socket, int id) {
     read(new_socket, receivingBuff, (size_t)MAX);  //lee lo que acabo de escribir el client
     string newPassword = receivingBuff;
 
+    string uName;
+    for (unsigned i = 0; i < users.size(); i++)
+    {
+        if (users[i].getId() == id)
+        {
+            uName = users[i].getUsername();
+            users[i].setPassword(newPassword);
+            break;
+        }
+    }
     string username;
     string password;
     string inLine;
@@ -251,16 +211,13 @@ void Server::changePassword(int new_socket, int id) {
             ss >> password;
             string newLine = username;
             newLine += " ";
-            for(int i = 0; i < users.size(); i++){
-                if (username == users[i].getUsername()){
-                    newLine += newPassword;
-                    users[i].setPassword(newPassword);
-
-                }else{
-                    newLine += password;
-                }
-                newLine += "\n";
+            if (username == uName){
+                newLine += newPassword;
+            }else{
+                newLine += password;
             }
+            newLine += "\n";
+
             tempFile << newLine;
 
         }
@@ -288,13 +245,12 @@ void Server::mainMenu(int new_socket, int id) {
         memset(receivingBuff, 0, MAX);
         read(new_socket, receivingBuff, (size_t)MAX);
         if(strcmp(receivingBuff, "exit") == 0){
-            close(new_socket);
+            //close(new_socket);
             exit(EXIT_SUCCESS);
         }
         if(strcmp(receivingBuff, "1") == 0){
             if(Login(new_socket, id)){
                 optionsWhenLoggedIn(new_socket);
-                //isActive = true;
                 loggedIn = true;
             }else{
                 string notFound = "Could not find the account";
@@ -469,9 +425,20 @@ void Server::sendMsgToAUser(int new_socket, int id){        //SOS :(
     memset(receivingBuff, 0, MAX);
     read(new_socket, receivingBuff, (size_t)MAX);   //LEE LO QUE EL MISMO CLIENTE ESCRIBIO
 
+    memset(sendingBuff, 0, MAX);
+    string name = "Message from: ";
+    for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+            name += users[i].getUsername();
+        }
+    }
+    strcpy(sendingBuff, name.c_str());
+    //write(new_socket, sendingBuff, (int)MAX);   //ENVIA AL CLIENTE "ENTER THE MESSAGE"
+
     for(int i = 0; i < users.size(); i++){
         if(users[i].getUsername() == userToSendTo){
             users[i].addMsg(receivingBuff);
+            write(users[i].getNewSocket(), sendingBuff, (int)MAX);
             write(users[i].getNewSocket(), receivingBuff, (int)MAX);
             break;
         }
@@ -513,19 +480,23 @@ void Server::sendMsgToALocation(int new_socket, int id) {
     memset(receivingBuff, 0, MAX);
     read(new_socket, receivingBuff, (size_t)MAX);   //LEE LO QUE EL MISMO CLIENTE ESCRIBIO
 
-    bool sent = false;
+    memset(sendingBuff, 0, MAX);
+    string name = "Message from: ";
+    for(int i = 0; i < users.size(); i++){
+        if(users[i].getId() == id){
+            name += users[i].getUsername();
+        }
+    }
+    strcpy(sendingBuff, name.c_str());
+
     for(int i = 0; i < users.size(); i++) {
-        for(int j = 0; j < users[i].getLocations().size(); i++){
-            if (users[i].getLocations().at(j) == locationToSendTo && users[i].getNewSocket() != new_socket) {
+        for(int j = 0; j < users[i].getLocations().size(); j++){
+            if(users[i].getLocations().at(j) == locationToSendTo && users[i].getNewSocket() != new_socket) {
+                users[i].addMsg(receivingBuff);
+                write(users[i].getNewSocket(), sendingBuff, (int)MAX);
                 write(users[i].getNewSocket(), receivingBuff, (int) MAX);
-                sent = true;
-                break;
             }
         }
-        if(sent){
-            break;
-        }
-
     }
     optionsWhenLoggedIn(new_socket);
 
@@ -541,13 +512,5 @@ void Server::seeLast10Msg(int new_socket, int id){
     }
     strcpy(sendingBuff, msgs.c_str());
     write(new_socket, sendingBuff, (int)MAX);
-    optionsWhenLoggedIn(new_socket);
-}
-
-void Server::notImplemented() {
-    memset(sendingBuff, 0, MAX);
-    string notImplemented = "Not implemented for this part of the project";
-    strcpy(sendingBuff, notImplemented.c_str());
-    write(new_socket, sendingBuff, (int)MAX);  //enviando el buffer
     optionsWhenLoggedIn(new_socket);
 }

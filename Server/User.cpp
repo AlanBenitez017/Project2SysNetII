@@ -8,12 +8,11 @@
 
 #include "User.hpp"
 
-User::User(string username, string password, int new_socket, int id, vector<string> locations) {
+User::User(string username, string password, int new_socket, int id) {
     this->username = username;
     this->password = password;
     this->new_socket = new_socket;
     this->id = id;
-    this->locations = locations;
 }
 
 User::User(){

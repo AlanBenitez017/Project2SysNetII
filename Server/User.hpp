@@ -22,7 +22,7 @@ class User{
     public:
 
         User();
-        User(string username, string password, int new_socket, int id, vector<string> locations);
+        User(string username, string password, int new_socket, int id);
         string username;
         string password;
         int new_socket;
